@@ -1,0 +1,60 @@
+version: '2'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: supersecret
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+    command: --local-infile=1
+    restart: unless-stopped
+
+  minio:
+    container_name: Minio
+    image: quay.io/minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=supersecret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ./minio:/data
+    restart: unless-stopped
+
+  minio-client:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 10;
+      mc alias set myminio http://minio:9000 admin supersecret;
+      mc mb myminio/mlflows3 || echo 'Bucket mlflows3 already exists'"
+
+  fastapi:
+    build: ./fastapi
+    container_name: fastapi_service
+    ports:
+      - "8081:8000"  # Accedes a FastAPI en http://localhost:8081
+    depends_on:
+      - mysql
+
+  jupyterlab:
+    build:
+      context: ./jupyterlab
+      dockerfile: Dockerfile
+    container_name: jupyterlab
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/work
+
+volumes:
+  mysql_data:
