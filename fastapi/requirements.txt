@@ -1,0 +1,11 @@
+mlflow
+pymysql
+scikit-learn==1.6.1
+pandas
+fastapi
+uvicorn
+numpy==2.2.4
+joblib
+dill
+boto3
+psutil==7.0.0
