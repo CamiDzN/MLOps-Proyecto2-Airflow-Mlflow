@@ -367,7 +367,7 @@ services:
     build: ./random-data-api
     container_name: random-data-api
     ports:
-      - "8001:8001"
+      - "8001:80"
     volumes:
       - ./Data:/data
 #    networks:
