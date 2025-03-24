@@ -63,27 +63,23 @@ def collect_covertype_data(**kwargs):
         else:
             raise Exception(f"Error al obtener datos para el grupo {group_number}: {response.text}")
 
-    # Definir los nombres de columna según las características del dataset covertype
+    # Las columnas que entrega el API ya vienen en el siguiente orden:
+    # Elevation, Aspect, Slope, Horizontal_Distance_To_Hydrology, Vertical_Distance_To_Hydrology,
+    # Horizontal_Distance_To_Roadways, Hillshade_9am, Hillshade_Noon, Hillshade_3pm,
+    # Horizontal_Distance_To_Fire_Points, Wilderness_Area, Soil_Type, Cover_Type
     columns = [
         "Elevation", "Aspect", "Slope",
         "Horizontal_Distance_To_Hydrology", "Vertical_Distance_To_Hydrology",
         "Horizontal_Distance_To_Roadways", "Hillshade_9am", "Hillshade_Noon",
-        "Hillshade_3pm", "Horizontal_Distance_To_Fire_Points"
+        "Hillshade_3pm", "Horizontal_Distance_To_Fire_Points",
+        "Wilderness_Area", "Soil_Type", "Cover_Type"
     ]
-    # Agregar los 4 campos para Wilderness_Area
-    for i in range(1, 5):
-        columns.append(f"Wilderness_Area{i}")
-    # Agregar los 40 campos para Soil_Type
-    for i in range(1, 41):
-        columns.append(f"Soil_Type{i}")
-    # Agregar la columna Cover_Type (variable objetivo)
-    columns.append("Cover_Type")
 
     df = pd.DataFrame(data_list, columns=columns)
 
     # Conectar a la base de datos model_db usando SQLAlchemy.
     engine = sqlalchemy.create_engine('mysql+pymysql://model_user:model_password@mysql/model_db')
-    # Guardar el dataset en la tabla "covertype_raw". Se usa if_exists="replace" para actualizar la información.
+    # Guardar el dataset en la tabla "covertype_raw". Con if_exists="replace" se actualiza la información.
     df.to_sql('covertype_raw', con=engine, if_exists='replace', index=False)
     print("Datos crudos guardados en MySQL en la tabla covertype_raw.")
 
@@ -93,7 +89,7 @@ collect_data_task = PythonOperator(
     dag=dag,
 )
 
-# Tarea 3: Leer los datos crudos desde MySQL, procesarlos y guardarlos en MySQL como preprocesados
+# Tarea 3: Leer los datos crudos desde MySQL, preprocesarlos y guardarlos en MySQL como preprocesados
 def preprocess_covertype_data(**kwargs):
     import pandas as pd
     import sqlalchemy
@@ -107,7 +103,11 @@ def preprocess_covertype_data(**kwargs):
     # Preprocesamiento básico: eliminación de filas con datos faltantes
     df_clean = df.dropna()
 
-    # Ejemplo de escalamiento para variables numéricas
+    # Realizar one-hot encoding para las variables categóricas "Wilderness_Area" y "Soil_Type"
+    # Con esto, se crean columnas binarias para cada categoría existente en ambas variables.
+    df_clean = pd.get_dummies(df_clean, columns=["Wilderness_Area", "Soil_Type"])
+
+    # Escalar las variables numéricas (las 10 primeras columnas)
     num_cols = [
         "Elevation", "Aspect", "Slope",
         "Horizontal_Distance_To_Hydrology", "Vertical_Distance_To_Hydrology",
@@ -133,9 +133,8 @@ def train_and_log_models(**kwargs):
     import mlflow.sklearn
     from mlflow.tracking import MlflowClient
 
-    # Agregamos la variable para definir el servidor MLflow.
+    # Agregar tracking URI para el servidor MLflow.
     mlflow.set_tracking_uri("http://mlflow:5000")
-
 
     import pandas as pd
     import sqlalchemy
