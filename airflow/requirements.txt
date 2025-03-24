@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn==1.0.2
+xgboost
+tensorflow
+pymysql
+joblib
+sqlalchemy
+requests
+mlflow
+boto3
