@@ -377,7 +377,7 @@ services:
   # MLflow Tracking Server
   ####################################
   mlflow:
-    image: ghcr.io/mlflow/mlflow
+    build: ./mlflow
     container_name: mlflow
     restart: always
     ports:
