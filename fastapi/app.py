@@ -1,40 +1,38 @@
 from fastapi import FastAPI, HTTPException
-import numpy as np
 from pydantic import BaseModel
-import mlflow.pyfunc  # Usamos mlflow para cargar el modelo desde el registro
-import os
+import mlflow.pyfunc  # Para cargar el modelo desde el registro
 import pandas as pd
 from mlflow.tracking import MlflowClient
+import mlflow
 
 app = FastAPI()
 
 # Lista de nombres de modelos a buscar en el registry de MLflow
 model_names = ["random_forest", "decision_tree", "svm", "logistic_regression"]
 
-# Diccionario para almacenar los modelos cargados (clave: nombre, valor: modelo mlflow)
+# Diccionario para almacenar los modelos cargados (clave: nombre, valor: modelo MLflow)
 models = {}
 
 def promote_models():
     """
-    Promociona una versión específica de cada modelo al stage 'Production'
+    Promociona una versión específica de cada modelo al stage "Production"
     usando MlflowClient. Ajusta los números de versión según tu registro.
     """
-    client = MlflowClient(tracking_uri="http://10.43.101.173:5000")
-
-    # Diccionario de modelos y versiones a promocionar
+    client = MlflowClient(tracking_uri="http://mlflow:5000")
+    # Diccionario de modelos y versiones a promocionar (ajusta los números según corresponda)
     models_to_promote = {
-        "random_forest": 29,        # Ajusta el número de versión
-        "decision_tree": 24,        # Ajusta el número de versión
-        "svm": 25,                  # Ajusta el número de versión
-        "logistic_regression": 22   # Ajusta el número de versión
+        "random_forest": 29,
+        "decision_tree": 24,
+        "svm": 25,
+        "logistic_regression": 22
     }
-
+    
     for model_name, version in models_to_promote.items():
         try:
             client.transition_model_version_stage(
                 name=model_name,   # Nombre exacto del modelo
-                version=version,   # Número de versión que se desea promocionar
-                stage="Production" # Stage al que se quiere pasar
+                version=version,   # Versión a promocionar
+                stage="Production" # Stage al que se desea pasar
             )
             print(f"Promovida la versión {version} del modelo '{model_name}' a Production.")
         except Exception as e:
@@ -45,14 +43,13 @@ def load_models():
     Carga los modelos registrados en MLflow para cada nombre presente en model_names.
     Se construye el URI de cada modelo con el formato: models:/{model_name}/Production.
     """
-    mlflow.set_tracking_uri("http://10.43.101.173:5000")  # Asegúrate de usar la IP/hostname correcto
+    mlflow.set_tracking_uri("http://mlflow:5000")
     global models
     models = {}  # Reinicia el diccionario
     print("Cargando modelos desde MLflow para:", model_names)
     for name in model_names:
         model_uri = f"models:/{name}/Production"
         try:
-            # Cargar el modelo usando mlflow.pyfunc
             loaded_model = mlflow.pyfunc.load_model(model_uri)
             models[name] = loaded_model
             print(f"Modelo '{name}' cargado exitosamente desde {model_uri}")
@@ -60,42 +57,40 @@ def load_models():
             print(f"Error al cargar el modelo '{name}' desde {model_uri}: {e}")
     print("Modelos actualmente cargados:", list(models.keys()))
 
-# Promocionar modelos (asegúrate de ajustar las versiones)
+# Promocionar y cargar modelos al iniciar la API
 promote_models()
-
-# Cargar los modelos al iniciar la API
 load_models()
 
 # Modelo seleccionado por defecto
 selected_model = "random_forest"
 
-# Esquema de entrada para la predicción (en este caso, características de pingüinos)
-class PenguinFeatures(BaseModel):
-    culmen_length_mm: float
-    culmen_depth_mm: float
-    flipper_length_mm: float
-    body_mass_g: float
-    island: int
+# Esquema de entrada para la predicción: únicamente las 10 variables numéricas,
+# de acuerdo al preprocesamiento realizado en el DAG.
+class CovertypeFeatures(BaseModel):
+    Elevation: float
+    Aspect: float
+    Slope: float
+    Horizontal_Distance_To_Hydrology: float
+    Vertical_Distance_To_Hydrology: float
+    Horizontal_Distance_To_Roadways: float
+    Hillshade_9am: float
+    Hillshade_Noon: float
+    Hillshade_3pm: float
+    Horizontal_Distance_To_Fire_Points: float
 
 @app.post("/predict/")
-def predict(features: PenguinFeatures):
+def predict(features: CovertypeFeatures):
     """
     Realiza la predicción usando el modelo seleccionado.
-    Se recibe un JSON con las características del pingüino, se construye un DataFrame y se envía al modelo.
-    Se mapea el resultado numérico a una etiqueta (por defecto: 1 -> "MALE", 0 -> "FEMALE").
+    Se recibe un JSON con las 10 variables numéricas, se construye un DataFrame y se
+    envía al modelo para obtener la predicción del Cover_Type (valor numérico).
     """
     global selected_model
     if selected_model not in models:
         raise HTTPException(status_code=400, detail=f"Modelo '{selected_model}' no encontrado.")
 
     # Preparar los datos de entrada en un DataFrame
-    input_data = pd.DataFrame([{
-        "culmen_length_mm": features.culmen_length_mm,
-        "culmen_depth_mm": features.culmen_depth_mm,
-        "flipper_length_mm": features.flipper_length_mm,
-        "body_mass_g": features.body_mass_g,
-        "island": features.island
-    }])
+    input_data = pd.DataFrame([features.dict()])
 
     try:
         # Realizar la predicción directamente con el modelo cargado
@@ -103,15 +98,14 @@ def predict(features: PenguinFeatures):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al procesar la predicción: {str(e)}")
 
-    # Mapear el resultado numérico a una etiqueta
-    sex = "MALE" if prediction[0] == 1 else "FEMALE"
-    return {"selected_model": selected_model, "prediction": sex}
+    # Se retorna el valor numérico predicho para Cover_Type
+    return {"selected_model": selected_model, "prediction": int(prediction[0])}
 
 @app.put("/select_model/{model_name}")
 def select_model(model_name: str):
     """
     Permite seleccionar un modelo distinto al actual.
-    Si el modelo solicitado no ha sido cargado, se retorna un error.
+    Si el modelo solicitado no ha sido cargado, retorna un error.
     """
     global selected_model
     if model_name not in models:
@@ -121,7 +115,7 @@ def select_model(model_name: str):
 
 @app.get("/")
 def home():
-    return {"message": "API de Predicción de Pingüinos con FastAPI basada en MLflow"}
+    return {"message": "API de Predicción de Covertype con FastAPI y MLflow"}
 
 @app.post("/reload_models/")
 def reload_models():
