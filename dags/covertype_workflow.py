@@ -45,7 +45,7 @@ clear_tables = MySqlOperator(
     dag=dag,
 )
 
-# Tarea 2: Recolectar los datos vía API desde random-data-api y guardar los datos crudos en MySQL
+# Tarea 2: Recolectar los datos vía API desde random-data-api y guardarlos en MySQL
 def collect_covertype_data(**kwargs):
     import requests
     import pandas as pd
@@ -63,7 +63,7 @@ def collect_covertype_data(**kwargs):
         else:
             raise Exception(f"Error al obtener datos para el grupo {group_number}: {response.text}")
 
-    # Las columnas que entrega el API ya vienen en el siguiente orden:
+    # Las columnas que entrega el API en el siguiente orden:
     # Elevation, Aspect, Slope, Horizontal_Distance_To_Hydrology, Vertical_Distance_To_Hydrology,
     # Horizontal_Distance_To_Roadways, Hillshade_9am, Hillshade_Noon, Hillshade_3pm,
     # Horizontal_Distance_To_Fire_Points, Wilderness_Area, Soil_Type, Cover_Type
@@ -79,7 +79,7 @@ def collect_covertype_data(**kwargs):
 
     # Conectar a la base de datos model_db usando SQLAlchemy.
     engine = sqlalchemy.create_engine('mysql+pymysql://model_user:model_password@mysql/model_db')
-    # Guardar el dataset en la tabla "covertype_raw". Con if_exists="replace" se actualiza la información.
+    # Guardar el dataset en la tabla "covertype_raw". Se usa if_exists="replace" para actualizar la información.
     df.to_sql('covertype_raw', con=engine, if_exists='replace', index=False)
     print("Datos crudos guardados en MySQL en la tabla covertype_raw.")
 
@@ -89,7 +89,7 @@ collect_data_task = PythonOperator(
     dag=dag,
 )
 
-# Tarea 3: Leer los datos crudos desde MySQL, preprocesarlos y guardarlos en MySQL como preprocesados
+# Tarea 3: Leer los datos crudos desde MySQL, preprocesarlos y guardarlos como preprocesados
 def preprocess_covertype_data(**kwargs):
     import pandas as pd
     import sqlalchemy
@@ -97,16 +97,15 @@ def preprocess_covertype_data(**kwargs):
 
     # Conectar a la base de datos model_db
     engine = sqlalchemy.create_engine('mysql+pymysql://model_user:model_password@mysql/model_db')
-    # Leer los datos crudos previamente almacenados en la tabla "covertype_raw"
+    # Leer los datos crudos de la tabla "covertype_raw"
     df = pd.read_sql('SELECT * FROM covertype_raw', con=engine)
-
-    # Preprocesamiento básico: eliminación de filas con datos faltantes
+    
+    # Eliminar filas con datos faltantes
     df_clean = df.dropna()
-
-    # Realizar one-hot encoding para las variables categóricas "Wilderness_Area" y "Soil_Type"
-    # Con esto, se crean columnas binarias para cada categoría existente en ambas variables.
-    df_clean = pd.get_dummies(df_clean, columns=["Wilderness_Area", "Soil_Type"])
-
+    
+    # Eliminar las variables categóricas, ya que se entrena únicamente con variables numéricas.
+    df_numeric = df_clean.drop(columns=["Wilderness_Area", "Soil_Type"])
+    
     # Escalar las variables numéricas (las 10 primeras columnas)
     num_cols = [
         "Elevation", "Aspect", "Slope",
@@ -115,11 +114,11 @@ def preprocess_covertype_data(**kwargs):
         "Hillshade_3pm", "Horizontal_Distance_To_Fire_Points"
     ]
     scaler = StandardScaler()
-    df_clean[num_cols] = scaler.fit_transform(df_clean[num_cols])
-
-    # Guardar los datos preprocesados en la tabla "covertype_preprocessed"
-    df_clean.to_sql('covertype_preprocessed', con=engine, if_exists='replace', index=False)
-    print("Datos preprocesados guardados en MySQL en la tabla covertype_preprocessed.")
+    df_numeric[num_cols] = scaler.fit_transform(df_numeric[num_cols])
+    
+    # Guardar el dataset preprocesado (únicamente numérico) en la tabla "covertype_preprocessed"
+    df_numeric.to_sql('covertype_preprocessed', con=engine, if_exists='replace', index=False)
+    print("Datos preprocesados (únicamente numéricos) guardados en MySQL en la tabla covertype_preprocessed.")
 
 preprocess_data_task = PythonOperator(
     task_id='preprocess_data',
@@ -132,10 +131,10 @@ def train_and_log_models(**kwargs):
     import mlflow
     import mlflow.sklearn
     from mlflow.tracking import MlflowClient
-
-    # Agregar tracking URI para el servidor MLflow.
+    
+    # Definir el Tracking URI de MLflow para el servidor
     mlflow.set_tracking_uri("http://mlflow:5000")
-
+    
     import pandas as pd
     import sqlalchemy
     from sklearn.model_selection import train_test_split
@@ -148,7 +147,7 @@ def train_and_log_models(**kwargs):
     engine = sqlalchemy.create_engine('mysql+pymysql://model_user:model_password@mysql/model_db')
     df = pd.read_sql('SELECT * FROM covertype_preprocessed', con=engine)
 
-    # Se asume que "Cover_Type" es la variable objetivo
+    # "Cover_Type" sigue siendo la variable objetivo; las características son ahora únicamente las variables numéricas.
     X = df.drop(columns=["Cover_Type"])
     y = df["Cover_Type"]
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
