@@ -54,7 +54,8 @@ def collect_covertype_data(**kwargs):
     data_list = []
     # Se recorren los 10 grupos (batchs)
     for group_number in range(1, 11):
-        url = f"http://10.43.101.172:8001/data?group_number={group_number}"
+        #url = f"http://10.43.101.173:8001/data?group_number={group_number}"
+        url = f"http://random-data-api/data?group_number={group_number}"
         response = requests.get(url)
         if response.status_code == 200:
             result = response.json()

@@ -1,0 +1,79 @@
+[2025-03-25T03:47:41.082+0000] {taskinstance.py:1125} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: covertype_workflow.collect_data scheduled__2025-03-24T03:41:55.127625+00:00 [queued]>
+[2025-03-25T03:47:41.106+0000] {taskinstance.py:1125} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: covertype_workflow.collect_data scheduled__2025-03-24T03:41:55.127625+00:00 [queued]>
+[2025-03-25T03:47:41.107+0000] {taskinstance.py:1331} INFO - Starting attempt 2 of 2
+[2025-03-25T03:47:41.132+0000] {taskinstance.py:1350} INFO - Executing <Task(PythonOperator): collect_data> on 2025-03-24 03:41:55.127625+00:00
+[2025-03-25T03:47:41.160+0000] {standard_task_runner.py:57} INFO - Started process 324 to run task
+[2025-03-25T03:47:41.178+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'covertype_workflow', 'collect_data', 'scheduled__2025-03-24T03:41:55.127625+00:00', '--job-id', '7', '--raw', '--subdir', 'DAGS_FOLDER/covertype_workflow.py', '--cfg-path', '/tmp/tmpjfhxl7k_']
+[2025-03-25T03:47:41.185+0000] {standard_task_runner.py:85} INFO - Job 7: Subtask collect_data
+[2025-03-25T03:47:41.393+0000] {task_command.py:410} INFO - Running <TaskInstance: covertype_workflow.collect_data scheduled__2025-03-24T03:41:55.127625+00:00 [running]> on host 8d5c1de389de
+[2025-03-25T03:47:41.614+0000] {taskinstance.py:1570} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='covertype_workflow' AIRFLOW_CTX_TASK_ID='collect_data' AIRFLOW_CTX_EXECUTION_DATE='2025-03-24T03:41:55.127625+00:00' AIRFLOW_CTX_TRY_NUMBER='2' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2025-03-24T03:41:55.127625+00:00'
+[2025-03-25T03:47:41.637+0000] {taskinstance.py:1847} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/connection.py", line 175, in _new_conn
+    (self._dns_host, self.port), self.timeout, **extra_kw
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/util/connection.py", line 95, in create_connection
+    raise err
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/util/connection.py", line 85, in create_connection
+    sock.connect(sa)
+ConnectionRefusedError: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/connectionpool.py", line 710, in urlopen
+    chunked=chunked,
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/connectionpool.py", line 398, in _make_request
+    conn.request(method, url, **httplib_request_kw)
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/connection.py", line 244, in request
+    super(HTTPConnection, self).request(method, url, body=body, headers=headers)
+  File "/usr/local/lib/python3.7/http/client.py", line 1281, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/usr/local/lib/python3.7/http/client.py", line 1327, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/usr/local/lib/python3.7/http/client.py", line 1276, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/usr/local/lib/python3.7/http/client.py", line 1036, in _send_output
+    self.send(msg)
+  File "/usr/local/lib/python3.7/http/client.py", line 976, in send
+    self.connect()
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/connection.py", line 205, in connect
+    conn = self._new_conn()
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/connection.py", line 187, in _new_conn
+    self, "Failed to establish a new connection: %s" % e
+urllib3.exceptions.NewConnectionError: <urllib3.connection.HTTPConnection object at 0x72da75ea5610>: Failed to establish a new connection: [Errno 111] Connection refused
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.7/site-packages/requests/adapters.py", line 498, in send
+    chunked=chunked,
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/connectionpool.py", line 788, in urlopen
+    method, url, error=e, _pool=self, _stacktrace=sys.exc_info()[2]
+  File "/home/airflow/.local/lib/python3.7/site-packages/urllib3/util/retry.py", line 592, in increment
+    raise MaxRetryError(_pool, url, error or ResponseError(cause))
+urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='10.43.101.172', port=8001): Max retries exceeded with url: /data?group_number=1 (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x72da75ea5610>: Failed to establish a new connection: [Errno 111] Connection refused'))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.7/site-packages/airflow/operators/python.py", line 181, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.7/site-packages/airflow/operators/python.py", line 198, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/covertype_workflow.py", line 58, in collect_covertype_data
+    response = requests.get(url)
+  File "/home/airflow/.local/lib/python3.7/site-packages/requests/api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "/home/airflow/.local/lib/python3.7/site-packages/requests/api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "/home/airflow/.local/lib/python3.7/site-packages/requests/sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "/home/airflow/.local/lib/python3.7/site-packages/requests/sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "/home/airflow/.local/lib/python3.7/site-packages/requests/adapters.py", line 520, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPConnectionPool(host='10.43.101.172', port=8001): Max retries exceeded with url: /data?group_number=1 (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x72da75ea5610>: Failed to establish a new connection: [Errno 111] Connection refused'))
+[2025-03-25T03:47:41.679+0000] {taskinstance.py:1373} INFO - Marking task as FAILED. dag_id=covertype_workflow, task_id=collect_data, execution_date=20250324T034155, start_date=20250325T034741, end_date=20250325T034741
+[2025-03-25T03:47:41.720+0000] {standard_task_runner.py:109} ERROR - Failed to execute job 7 for task collect_data (HTTPConnectionPool(host='10.43.101.172', port=8001): Max retries exceeded with url: /data?group_number=1 (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x72da75ea5610>: Failed to establish a new connection: [Errno 111] Connection refused')); 324)
+[2025-03-25T03:47:41.805+0000] {local_task_job_runner.py:232} INFO - Task exited with return code 1
+[2025-03-25T03:47:41.907+0000] {taskinstance.py:2674} INFO - 0 downstream tasks scheduled from follow-on schedule check
