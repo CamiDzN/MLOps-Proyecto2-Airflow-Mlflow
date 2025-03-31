@@ -19,6 +19,9 @@ x-airflow-common:
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW_CONN_MYSQL_DEFAULT: "mysql://model_user:model_password@mysql:3306/model_db"
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    AWS_ACCESS_KEY_ID: admin
+    AWS_SECRET_ACCESS_KEY: supersecret
+    MLFLOW_S3_ENDPOINT_URL: http://minio:9000
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs

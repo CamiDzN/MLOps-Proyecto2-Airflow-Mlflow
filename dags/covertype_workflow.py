@@ -168,10 +168,9 @@ def train_and_log_models(**kwargs):
             model.fit(X_train, y_train)
             predictions = model.predict(X_test)
             acc = accuracy_score(y_test, predictions)
-            mlflow.log_param("model", name)
-            mlflow.log_metric("accuracy", acc)
+            mlflow.log_params({"model": name})
+            mlflow.log_metrics({"accuracy": acc})
             mlflow.sklearn.log_model(model, artifact_path=name)
-            mlflow.end_run()
             if acc > best_accuracy:
                 best_accuracy = acc
                 best_model_name = name
