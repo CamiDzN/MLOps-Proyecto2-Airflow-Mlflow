@@ -1,4 +1,4 @@
-mlflow
+mlflow==2.21.2
 pymysql
 scikit-learn==1.6.1
 pandas
