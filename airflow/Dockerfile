@@ -1,4 +1,4 @@
-FROM apache/airflow:2.6.0
+FROM apache/airflow:2.6.0-python3.9
 
 # 1) Cambiamos a usuario root solo para apt-get
 USER root
