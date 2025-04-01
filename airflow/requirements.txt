@@ -3,5 +3,5 @@ numpy
 requests
 sqlalchemy
 pymysql
-mlflow
 scikit-learn
+mlflow==2.2.1
