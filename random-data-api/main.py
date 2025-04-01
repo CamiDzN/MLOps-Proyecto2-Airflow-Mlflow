@@ -39,13 +39,23 @@ with open('/data/covertype.csv', newline='') as csvfile:
 
 batch_size = len(data) // 10
 
-# Definir la función para generar la fracción de datos aleatoria
-def get_batch_data(batch_number:int, batch_size:int=batch_size):
-    start_index = batch_number * batch_size
-    end_index = start_index + batch_size
-    # Obtener datos aleatorios dentro del rango del grupo
-    random_data = random.sample(data[start_index:end_index], batch_size // 10)
+
+def get_batch_data(batch_number: int, batch_size: int = batch_size):
+    # Usar (batch_number - 1) para calcular el índice inicial
+    start_index = (batch_number - 1) * batch_size
+    end_index = batch_number * batch_size
+    # Asegurarse de no exceder el largo de data (especialmente para el último batch)
+    if end_index > len(data):
+        end_index = len(data)
+    # Verificar que hay suficientes filas para muestrear
+    subset = data[start_index:end_index]
+    required_sample = batch_size // 10
+    if len(subset) < required_sample:
+        raise Exception(f"No hay suficientes datos en el batch {batch_number} para muestrear {required_sample} filas.")
+    random_data = random.sample(subset, required_sample)
     return random_data
+
+
 
 # Cargar información previa si existe
 if os.path.isfile('/data/timestamps.json'):

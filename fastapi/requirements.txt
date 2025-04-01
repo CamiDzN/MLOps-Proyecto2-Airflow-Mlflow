@@ -1,10 +1,10 @@
-mlflow
+mlflow==1.30.0
 pymysql
 scikit-learn==1.6.1
 pandas
 fastapi
 uvicorn
-numpy==2.2.4
+numpy
 joblib
 dill
 boto3
