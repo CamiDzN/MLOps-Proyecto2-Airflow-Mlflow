@@ -1,0 +1,14 @@
+[2025-04-01T04:36:44.654+0000] {taskinstance.py:1125} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: covertype_workflow.notify_api_reload manual__2025-04-01T04:31:09.883653+00:00 [queued]>
+[2025-04-01T04:36:44.683+0000] {taskinstance.py:1125} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: covertype_workflow.notify_api_reload manual__2025-04-01T04:31:09.883653+00:00 [queued]>
+[2025-04-01T04:36:44.684+0000] {taskinstance.py:1331} INFO - Starting attempt 1 of 2
+[2025-04-01T04:36:44.725+0000] {taskinstance.py:1350} INFO - Executing <Task(PythonOperator): notify_api_reload> on 2025-04-01 04:31:09.883653+00:00
+[2025-04-01T04:36:44.774+0000] {standard_task_runner.py:57} INFO - Started process 527 to run task
+[2025-04-01T04:36:44.834+0000] {standard_task_runner.py:84} INFO - Running: ['***', 'tasks', 'run', 'covertype_workflow', 'notify_api_reload', 'manual__2025-04-01T04:31:09.883653+00:00', '--job-id', '104', '--raw', '--subdir', 'DAGS_FOLDER/covertype_workflow.py', '--cfg-path', '/tmp/tmprdf3_mqc']
+[2025-04-01T04:36:44.847+0000] {standard_task_runner.py:85} INFO - Job 104: Subtask notify_api_reload
+[2025-04-01T04:36:45.179+0000] {task_command.py:410} INFO - Running <TaskInstance: covertype_workflow.notify_api_reload manual__2025-04-01T04:31:09.883653+00:00 [running]> on host fa1ab66db115
+[2025-04-01T04:36:45.941+0000] {taskinstance.py:1570} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='covertype_workflow' AIRFLOW_CTX_TASK_ID='notify_api_reload' AIRFLOW_CTX_EXECUTION_DATE='2025-04-01T04:31:09.883653+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-04-01T04:31:09.883653+00:00'
+[2025-04-01T04:36:46.709+0000] {covertype_workflow.py:258} INFO - Respuesta del API de inferencia: {'message': 'Modelos recargados', 'models_loaded': []}
+[2025-04-01T04:36:46.710+0000] {python.py:183} INFO - Done. Returned value was: None
+[2025-04-01T04:36:46.833+0000] {taskinstance.py:1373} INFO - Marking task as SUCCESS. dag_id=covertype_workflow, task_id=notify_api_reload, execution_date=20250401T043109, start_date=20250401T043644, end_date=20250401T043646
+[2025-04-01T04:36:47.066+0000] {local_task_job_runner.py:232} INFO - Task exited with return code 0
+[2025-04-01T04:36:47.253+0000] {taskinstance.py:2674} INFO - 0 downstream tasks scheduled from follow-on schedule check
