@@ -8,35 +8,11 @@ import mlflow
 app = FastAPI()
 
 # Lista de nombres de modelos a buscar en el registry de MLflow
-model_names = ["random_forest", "decision_tree", "svm", "logistic_regression"]
+model_names = ["CovertypeModel"]
 
 # Diccionario para almacenar los modelos cargados (clave: nombre, valor: modelo MLflow)
 models = {}
 
-def promote_models():
-    """
-    Promociona una versión específica de cada modelo al stage "Production"
-    usando MlflowClient. Ajusta los números de versión según tu registro.
-    """
-    client = MlflowClient(tracking_uri="http://mlflow:5000")
-    # Diccionario de modelos y versiones a promocionar (ajusta los números según corresponda)
-    models_to_promote = {
-        "random_forest": 29,
-        "decision_tree": 24,
-        "svm": 25,
-        "logistic_regression": 22
-    }
-    
-    for model_name, version in models_to_promote.items():
-        try:
-            client.transition_model_version_stage(
-                name=model_name,   # Nombre exacto del modelo
-                version=version,   # Versión a promocionar
-                stage="Production" # Stage al que se desea pasar
-            )
-            print(f"Promovida la versión {version} del modelo '{model_name}' a Production.")
-        except Exception as e:
-            print(f"Error al promocionar el modelo '{model_name}' versión {version}: {e}")
 
 def load_models():
     """
@@ -62,7 +38,7 @@ promote_models()
 load_models()
 
 # Modelo seleccionado por defecto
-selected_model = "random_forest"
+selected_model = "CovertypeModel"
 
 # Esquema de entrada para la predicción: únicamente las 10 variables numéricas,
 # de acuerdo al preprocesamiento realizado en el DAG.
