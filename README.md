@@ -138,7 +138,5 @@ Abre http://localhost:8081/docs.
 
 Selecciona el endpoint /predict/, haz clic en "Try it out" y llena el formulario con las variables numéricas requeridas.
 
----
 
-> ✅ Si deseas contribuir o reportar errores, abre un *issue* o *pull request*. Este proyecto es parte de una práctica de MLOps aplicada para entornos reales.
 
