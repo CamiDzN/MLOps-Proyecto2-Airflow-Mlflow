@@ -122,13 +122,13 @@ MLOps-Proyecto2/
 4. Acceder a Airflow UI:
    [http://localhost:8080](http://localhost:8080)
 
-Ejecutar el DAG covertype_workflow desde la interfaz gráfica de Airflow:
+5. Ejecutar el DAG covertype_workflow desde la interfaz gráfica de Airflow:
 
 Inicia sesión con usuario airflow y contraseña airflow.
 
 Activa el DAG y haz clic en "Trigger DAG" para ejecutarlo.
 
-Acceder a la API de inferencia desde el navegador:
+6. Acceder a la API de inferencia desde el navegador:
 
 Abre http://localhost:8081/docs para ver la documentación interactiva de Swagger.
 
