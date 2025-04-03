@@ -114,21 +114,25 @@ MLOps-Proyecto2/
    _AIRFLOW_WWW_USER_PASSWORD=airflow
    ```
 
-3. Levantar los servicios:
+3. Levantar AirFlow
+   ```bash
+   docker-compose run --rm airflow-init
+   ```
+5. Levantar los servicios:
    ```bash
    docker-compose up -d --build
    ```
 
-4. Acceder a Airflow UI:
+6. Acceder a Airflow UI:
    [http://localhost:8080](http://localhost:8080)
 
-5. Ejecutar el DAG covertype_workflow desde la interfaz gráfica de Airflow:
+7. Ejecutar el DAG covertype_workflow desde la interfaz gráfica de Airflow:
 
 Inicia sesión con usuario airflow y contraseña airflow.
 
 Activa el DAG y haz clic en "Trigger DAG" para ejecutarlo.
 
-6. Acceder a la API de inferencia desde el navegador:
+8. Acceder a la API de inferencia desde el navegador:
 
 Abre http://localhost:8081/docs.
 
