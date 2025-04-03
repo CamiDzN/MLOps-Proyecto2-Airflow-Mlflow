@@ -127,10 +127,10 @@ MLOps-Proyecto2/
    [http://localhost:8080](http://localhost:8080)
 
 7. Ejecutar el DAG covertype_workflow desde la interfaz gráfica de Airflow:
-
-Inicia sesión con usuario airflow y contraseña airflow.
-
-Activa el DAG y haz clic en "Trigger DAG" para ejecutarlo.
+  
+  Inicia sesión con usuario airflow y contraseña airflow.
+  
+  Activa el DAG y haz clic en "Trigger DAG" para ejecutarlo.
 
 8. Acceder a la API de inferencia desde el navegador:
 
