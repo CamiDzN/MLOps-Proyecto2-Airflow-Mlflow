@@ -130,7 +130,7 @@ Activa el DAG y haz clic en "Trigger DAG" para ejecutarlo.
 
 6. Acceder a la API de inferencia desde el navegador:
 
-Abre http://localhost:8081/docs para ver la documentación interactiva de Swagger.
+Abre http://localhost:8081/docs.
 
 Selecciona el endpoint /predict/, haz clic en "Try it out" y llena el formulario con las variables numéricas requeridas.
 
