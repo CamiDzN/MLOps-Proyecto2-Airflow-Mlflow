@@ -48,17 +48,17 @@ El DAG principal define 5 tareas:
 
 ## 5. API de Inferencia (FastAPI)
 
-La API corre en `http://localhost:8081` y ofrece los siguientes endpoints:
+La API corre en http://localhost:8081 y ofrece los siguientes endpoints:
 
-- `POST /predict/`: recibe un JSON con las 10 variables numéricas y retorna la clase `Cover_Type` predicha.
-- `POST /reload_models/`: recarga los modelos en memoria desde MLflow.
-- `PUT /select_model/{name}`: cambia el modelo activo por nombre.
-- `POST /promote_models/`: promueve una versión específica al stage Production (opcional).
+POST /predict/: recibe un JSON con las 10 variables numéricas y retorna la clase Cover_Type predicha.
+
+POST /reload_models/: recarga los modelos en memoria desde MLflow.
+
+Swagger disponible en: http://localhost:8081/docs
 
 ![image](https://github.com/user-attachments/assets/f0769a60-5b49-4049-b267-90ed5cb7a2ba)
 
 ![image](https://github.com/user-attachments/assets/10cb1e9b-d682-4bc4-9c44-92bfc6ae6850)
-
 
 
 ## 6. Despliegue del Proyecto
@@ -67,23 +67,36 @@ La API corre en `http://localhost:8081` y ofrece los siguientes endpoints:
 
 ```
 MLOps-Proyecto2/
+├── Data/
+│   ├── covertype.csv
+│   └── timestamps.json
 ├── airflow/
-│   └── dags/
-│       └── covertype_workflow.py
-├── mlflow/
-│   └── Dockerfile
+│   ├── dags/
+│   │   └── covertype_workflow.py
+│   ├── Dockerfile
+│   └── requirements.txt
 ├── fastapi/
+│   ├── Dockerfile
 │   ├── app.py
 │   └── requirements.txt
+├── logs/
+│   ├── dag_id=covertype_workflow/
+│   ├── dag_processor_manager/
+│   └── scheduler/
+├── minio/
+│   ├── .minio.sys/
+│   └── mlflows3/artifacts/0/
+├── mlflow/
+│   └── Dockerfile
+├── mysql-init/
+│   └── init.sql
 ├── random-data-api/
+│   ├── Dockerfile
 │   ├── main.py
 │   └── requirements.txt
-├── Data/
-│   └── covertype.csv
-├── docker-compose.yml
 ├── .env
-└── docs/
-    └── arquitectura-mlops.png
+├── README.md
+└── docker-compose.yml
 ```
 
 ### Pasos para Desplegar
@@ -109,28 +122,17 @@ MLOps-Proyecto2/
 4. Acceder a Airflow UI:
    [http://localhost:8080](http://localhost:8080)
 
-5. Trigger el DAG `covertype_workflow` desde la UI o vía CLI:
-   ```bash
-   docker-compose exec airflow-webserver airflow dags trigger covertype_workflow
-   ```
+Ejecutar el DAG covertype_workflow desde la interfaz gráfica de Airflow:
 
-6. Probar la inferencia:
-   ```bash
-   curl -X POST http://localhost:8081/predict/ \
-     -H "Content-Type: application/json" \
-     -d '{
-       "Elevation": 2500,
-       "Aspect": 45,
-       "Slope": 9,
-       "Horizontal_Distance_To_Hydrology": 100,
-       "Vertical_Distance_To_Hydrology": 10,
-       "Horizontal_Distance_To_Roadways": 500,
-       "Hillshade_9am": 200,
-       "Hillshade_Noon": 220,
-       "Hillshade_3pm": 150,
-       "Horizontal_Distance_To_Fire_Points": 300
-     }'
-   ```
+Inicia sesión con usuario airflow y contraseña airflow.
+
+Activa el DAG y haz clic en "Trigger DAG" para ejecutarlo.
+
+Acceder a la API de inferencia desde el navegador:
+
+Abre http://localhost:8081/docs para ver la documentación interactiva de Swagger.
+
+Selecciona el endpoint /predict/, haz clic en "Try it out" y llena el formulario con las variables numéricas requeridas.
 
 ---
 
