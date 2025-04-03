@@ -21,9 +21,8 @@ La arquitectura está conformada por los siguientes servicios desplegados median
 - **FastAPI**: API REST para servir el modelo entrenado y realizar predicciones.
 - **Random Data API**: servicio auxiliar que simula la generación incremental de datos del dataset Covertype.
 
-### Arquitectura Visual
+![image](https://github.com/user-attachments/assets/c301c903-1fa1-492a-9945-3dd5a5513cef)
 
-![Arquitectura MLOps](./docs/arquitectura-mlops.png)
 
 ## 3. Tareas del DAG `covertype_workflow`
 
@@ -35,8 +34,8 @@ El DAG principal define 5 tareas:
 4. **train_models**: entrena varios modelos, registra los resultados en MLflow y promueve el mejor a "Production".
 5. **notify_api_reload**: notifica al servicio FastAPI para recargar el último modelo de MLflow.
 
-> Captura ejemplo del DAG ejecutado:
-> ![Ejecución del DAG](./docs/dag-ejecutado.png)
+![image](https://github.com/user-attachments/assets/e8ce7ada-d84e-4ee4-8d08-e059a5322c96)
+
 
 ## 4. Registro de Modelos y Artefactos con MLflow
 
@@ -56,7 +55,11 @@ La API corre en `http://localhost:8081` y ofrece los siguientes endpoints:
 - `PUT /select_model/{name}`: cambia el modelo activo por nombre.
 - `POST /promote_models/`: promueve una versión específica al stage Production (opcional).
 
-> Swagger disponible en: [http://localhost:8081/docs](http://localhost:8081/docs)
+![image](https://github.com/user-attachments/assets/f0769a60-5b49-4049-b267-90ed5cb7a2ba)
+
+![image](https://github.com/user-attachments/assets/10cb1e9b-d682-4bc4-9c44-92bfc6ae6850)
+
+
 
 ## 6. Despliegue del Proyecto
 
