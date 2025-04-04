@@ -10,7 +10,7 @@ El proyecto busca ilustrar cómo herramientas como Airflow, MLflow, MinIO, MySQL
 
 ## 2. Arquitectura y Servicios (Docker Compose)
 
-La arquitectura está conformada por los siguientes servicios desplegados mediante Docker Compose y conectados en la red `mlops_net`:
+La arquitectura está conformada por los siguientes servicios desplegados mediante Docker Compose y conectados en la red `mlops_net` a excepción del Random Data API que se conecta via Internet (IP):
 
 - **Airflow**: orquesta el flujo de trabajo del ML pipeline mediante un DAG. Utiliza PostgreSQL como base de metadatos y Redis como broker.
 - **PostgreSQL**: almacena la metadata de Airflow.
@@ -66,13 +66,13 @@ Swagger disponible en: http://localhost:8081/docs
 ### Estructura de Carpetas
 
 ```
-MLOps-Proyecto2/
+MLOps-Proyecto2
 ├── Data/
 │   ├── covertype.csv
 │   └── timestamps.json
+├── dags/
+│   ├── covertype_workflow.py
 ├── airflow/
-│   ├── dags/
-│   │   └── covertype_workflow.py
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── fastapi/
@@ -109,18 +109,16 @@ MLOps-Proyecto2/
 
 2. Crear el archivo `.env` con:
    ```dotenv
-   AIRFLOW_UID=1001
-   _AIRFLOW_WWW_USER_USERNAME=airflow
-   _AIRFLOW_WWW_USER_PASSWORD=airflow
+   echo -e "AIRFLOW_UID=$(id -u)" > .env
    ```
 
 3. Levantar AirFlow
    ```bash
-   docker-compose run --rm airflow-init
+   docker-compose up airflow-init
    ```
 5. Levantar los servicios:
    ```bash
-   docker-compose up -d --build
+   docker-compose up -d
    ```
 
 6. Acceder a Airflow UI:
@@ -135,6 +133,8 @@ MLOps-Proyecto2/
 8. Acceder a la API de inferencia desde el navegador:
 
 Abre http://localhost:8081/docs.
+
+Selecciona el endpoint /reload_models/, haz clic "Try it out" y ejecuta para que recargue el modelo desde Mlflow.
 
 Selecciona el endpoint /predict/, haz clic en "Try it out" y llena el formulario con las variables numéricas requeridas.
 

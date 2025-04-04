@@ -53,7 +53,7 @@ def collect_covertype_data():
     engine = sqlalchemy.create_engine('mysql+pymysql://model_user:model_password@mysql/model_db')
     data_list = []
 
-    # Pedimos datos a random-data-api (internamente lo llamamos: http://random-data-api:80/data)
+    # Pedimos datos a random-data-api (internamente lo llamamos: http://random-data-api:8001/data)
     for group_number in range(1, 11):
         url = f"http://10.43.101.172:8001/data?group_number={group_number}"
         resp = requests.get(url)
@@ -222,7 +222,7 @@ train_models_task = PythonOperator(
 ################################
 def notify_api_reload():
     try:
-        r = requests.post("http://fastapi:8000/reload_models/")
+        r = requests.post("http://fastapi:8081/reload_models/")
         logging.info(f"Respuesta reload_models: {r.json()}")
     except Exception as e:
         logging.error(f"Error al notificar reload: {e}")
