@@ -1,5 +1,3 @@
-version: '3.8'
-
 x-airflow-common:
   &airflow-common
   build:
@@ -18,6 +16,10 @@ x-airflow-common:
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW_CONN_MYSQL_DEFAULT: "mysql://model_user:model_password@mysql:3306/model_db"
+    # Variables para MinIO / MLflow
+    AWS_ACCESS_KEY_ID: admin
+    AWS_SECRET_ACCESS_KEY: supersecret
+    MLFLOW_S3_ENDPOINT_URL: http://minio:9000
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
@@ -32,10 +34,11 @@ x-airflow-common:
     postgres:
       condition: service_healthy
 
+
 services:
-  ####################################
-  # Base de datos para Airflow (PostgreSQL)
-  ####################################
+  ################################################################
+  # PostgreSQL - BD para Airflow
+  ################################################################
   postgres:
     image: postgres:13
     environment:
@@ -55,10 +58,9 @@ services:
     networks:
       - mlops_net
 
-
-  ####################################
-  # Broker de mensajes para Airflow (Redis)
-  ####################################
+  ################################################################
+  # Redis - broker Celery
+  ################################################################
   redis:
     image: redis:latest
     expose:
@@ -73,15 +75,14 @@ services:
     networks:
       - mlops_net
 
-
-  ####################################
-  # Stack de Airflow
-  ####################################
+  ################################################################
+  # Airflow (webserver, scheduler, worker, triggerer)
+  ################################################################
   airflow-webserver:
     <<: *airflow-common
     command: webserver
     ports:
-      - "8080:8080"
+      - "8080:8080"  # Acceso: http://TU_VM:8080
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s
@@ -95,7 +96,6 @@ services:
         condition: service_completed_successfully
     networks:
       - mlops_net
-
 
   airflow-scheduler:
     <<: *airflow-common
@@ -136,7 +136,6 @@ services:
         condition: service_completed_successfully
     networks:
       - mlops_net
-
 
 
   airflow-triggerer:
@@ -244,7 +243,6 @@ services:
     environment:
       <<: *airflow-common-env
       CONNECTION_CHECK_MAX_COUNT: "0"
-    # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
     command:
       - bash
       - -c
@@ -279,10 +277,10 @@ services:
 
 
 
-  ####################################
-  # MySQL Unificado para MLflow y Airflow
-  # (El script de ./mysql-init debe crear la base de datos "mlflow" y el usuario 'mlflow')
-  ####################################
+
+  ################################################################
+  # MySQL (para MLflow y tu model_db)
+  ################################################################
   mysql:
     image: mysql:8.0
     container_name: mysql
@@ -301,12 +299,9 @@ services:
     networks:
       - mlops_net
 
-
-  ####################################
-  # Minio como almacenamiento de artefactos para MLflow
-  ####################################
-
-
+  ################################################################
+  # MinIO
+  ################################################################
   minio:
     container_name: Minio
     image: quay.io/minio/minio:latest
@@ -323,7 +318,6 @@ services:
     networks:
       - mlops_net
 
-
   minio-client:
     image: minio/mc
     depends_on:
@@ -336,18 +330,14 @@ services:
     networks:
       - mlops_net
 
-
-
-  ####################################
-  # API para inferencia (FastAPI)
-  ####################################
-
-
+  ################################################################
+  # FastAPI - Inferencia
+  ################################################################
   fastapi:
     build: ./fastapi
     container_name: fastapi_service
     ports:
-      - "8081:8000"  # Accedes a FastAPI en http://localhost:8081
+      - "8081:8081"
     volumes:
       - models_volume:/opt/airflow/models
     depends_on:
@@ -359,29 +349,28 @@ services:
     networks:
       - mlops_net
 
-
-  ####################################
-  # API para datos aleatorios (para entrenamiento)
-  ####################################
+  ################################################################
+  # random-data-api
+  ################################################################
   random-data-api:
     build: ./random-data-api
     container_name: random-data-api
     ports:
-      - "8001:80"
+      - "8001:8001"
     volumes:
       - ./Data:/data
 #    networks:
 #      - mlops_net
 
-####################################
+  ################################################################
   # MLflow Tracking Server
-  ####################################
+  ################################################################
   mlflow:
     build: ./mlflow
     container_name: mlflow
     restart: always
     ports:
-      - "5000:5000"
+      - "5001:5000"
     environment:
       - MLFLOW_S3_ENDPOINT_URL=http://minio:9000
       - AWS_ACCESS_KEY_ID=admin
@@ -397,7 +386,6 @@ services:
       - minio
     networks:
       - mlops_net
-
 
 volumes:
   postgres-db-volume:

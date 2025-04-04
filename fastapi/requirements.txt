@@ -1,11 +1,8 @@
-mlflow
-pymysql
-scikit-learn==1.6.1
-pandas
 fastapi
 uvicorn
-numpy==2.2.4
-joblib
-dill
+requests
+pandas
+scikit-learn
+mlflow==2.2.1
+pandas
 boto3
-psutil==7.0.0
