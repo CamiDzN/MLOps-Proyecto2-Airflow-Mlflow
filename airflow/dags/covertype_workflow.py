@@ -55,7 +55,7 @@ def collect_covertype_data():
 
     # Pedimos datos a random-data-api (internamente lo llamamos: http://random-data-api:80/data)
     for group_number in range(1, 11):
-        url = f"http://random-data-api/data?group_number={group_number}"
+        url = f"http://10.43.101.172:80/data?group_number={group_number}"
         resp = requests.get(url)
         if resp.status_code == 200:
             result = resp.json()
