@@ -337,7 +337,7 @@ services:
     build: ./fastapi
     container_name: fastapi_service
     ports:
-      - "8081:8000"
+      - "8081:8081"
     volumes:
       - models_volume:/opt/airflow/models
     depends_on:
@@ -356,7 +356,7 @@ services:
     build: ./random-data-api
     container_name: random-data-api
     ports:
-      - "8001:80"
+      - "8001:8001"
     volumes:
       - ./Data:/data
 #    networks:
